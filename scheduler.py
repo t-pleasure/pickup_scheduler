@@ -1,7 +1,8 @@
 #!/usr/bin/python
 #
 # Contains logic for parsing pickup and recipients json data as well as
-# logic for scheduling deliveries.
+# logic for scheduling deliveries. When using this file as a script, 
+# this file will output csv data to stdout.
 #
 # Usage: $0 --providers=$PICKUP_JSON --receivers=$RECIPIENTS_JSON
 #
@@ -105,7 +106,7 @@ def can_deliver_timely(p, r):
 ################################################################
 if __name__ == "__main__":
   # parse arguments
-  parser = argparse.ArgumentParser(description='Performs delivery scheduling given pickup and recipients data.')
+  parser = argparse.ArgumentParser(description='Performs delivery scheduling given pickup and recipients data. Output will be displayed to stdout as csv data.')
   
   parser.add_argument("--providers", 
                       action="store", 
@@ -186,10 +187,6 @@ if __name__ == "__main__":
 
   # iterate through matches and write to output
   for (pid, rid) in matches:
-    # ignore invalid matches (this is an artifact of the bipartite-matching library's attempt at over-assigning)
-    if (pid, rid) not in G:
-      continue
-
     p = providers[pid]
     r = recipients[rid]
     pickup_dt = dt.fromtimestamp(p["time"])
