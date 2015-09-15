@@ -205,6 +205,6 @@ if __name__ == "__main__":
             "recipient_accepts": bits2food(r["accepts"]),
             "recipient_hours_on_day_of_pickup": bits2hours(r["availability"][pickup_weekday]),
             "trip_distance": "%f miles"%distance,
-            "trip_duration": hr_str(duration),
+            "trip_duration": "%s (%0.2f mins)"%(hr_str(duration), duration*60) ,
             "estimated_delivery_window":  "%s-%s"%(hr_str(pickup_hr + duration), hr_str(pickup_hr + 1 + duration))}
     out.writerow(data)
