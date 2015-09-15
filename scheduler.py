@@ -1,8 +1,16 @@
-import json, csv, sys
+#!/usr/bin/python
+#
+# Contains logic for parsing pickup and recipients json data as well as
+# logic for scheduling deliveries.
+#
+# Usage: $0 --providers=$PICKUP_JSON --receivers=$RECIPIENTS_JSON
+#
+import sys, argparse
+import json, csv
 from collections import defaultdict
 from datetime import datetime as dt
 from geopy.distance import vincenty
-from matching import uni_matching
+from matching import full_left_match
 
 # Mapping from integer to day of week
 num2day = {0: "monday", 
@@ -91,13 +99,30 @@ def can_deliver_timely(p, r):
 
 
 ################################################################
+#                                                             #
 # Driver section of code (only invoked when called as script) #
 #                                                             #
 ################################################################
 if __name__ == "__main__":
+  # parse arguments
+  parser = argparse.ArgumentParser(description='Performs delivery scheduling given pickup and recipients data.')
+  
+  parser.add_argument("--providers", 
+                      action="store", 
+                      dest="provider_fname", 
+                      required=True, 
+                      help="path to provider json file")
+  parser.add_argument("--recipients", 
+                      action="store", 
+                      dest="recipient_fname", 
+                      required=True,
+                      help="path to recipients json file")
+
+  opts = parser.parse_args()
+
   # read in data
-  providers = dict((p["id"], p) for p in json.load(open("data/pickups.json")))
-  recipients = dict((r["id"], r) for r in json.load(open("data/recipients.json")))
+  providers = dict((p["id"], p) for p in json.load(open(opts.provider_fname)))
+  recipients = dict((r["id"], r) for r in json.load(open(opts.recipient_fname)))
 
   # -- Greate Graph Data --
   # create a connection from (provider -> recipient) if
@@ -113,7 +138,7 @@ if __name__ == "__main__":
   # convert graph data to flattened list of tuples form
   glist = [(p,r,d) for ((p,r), d) in G.items()]
   # perform matching on graph
-  matches = uni_matching(glist)
+  matches = full_left_match(glist)
 
   ##########################
   # -- generate outputs -- #
